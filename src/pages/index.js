@@ -2,6 +2,46 @@ import React from 'react'
 import Link from 'gatsby-link'
 
 const IndexPage = props => {
+  const articles = props.data.allContentfulPerson.edges[0].node.blog_post.map(
+    post => {
+      const tags = post.tags.map(tag => {
+        return (
+          <a href={`/tags/${tag}`} className="tag" key={tag.id}>
+            {tag}
+          </a>
+        )
+      })
+
+      return (
+        <li className="item">
+          <article key={post.id}>
+            <img
+              className="thumbnail"
+              src={`${post.heroImage.file.url}?fit=scale&w=350&h=196`}
+              srcSet={`${post.heroImage.file.url}?w=350&h=196&fit=fill 350w, ${
+                post.heroImage.file.url
+              }?w=1000&h=562&fit=fill 1000w, ${
+                post.heroImage.file.url
+              }?w=2000&h=1125&fit=fill 2000w`}
+              sizes="(min-width: 1024px) 400px, 100vw"
+            />
+            <time className="tiny date">
+              {new Date(post.publishDate).toDateString()}
+            </time>
+            <h4>
+              <a href={`/blog/${post.slug}`} className="title">
+                {post.title}
+              </a>
+            </h4>
+            <p>{post.description.description}</p>
+
+            <div className="tags">{tags}</div>
+          </article>
+        </li>
+      )
+    }
+  )
+
   return (
     // <div>
     //   <h1>Hi people!!!</h1>
@@ -70,12 +110,7 @@ const IndexPage = props => {
         <div className="items-bar wrapper">
           <h2>Recent articles</h2>
         </div>
-        <ul className="items-list wrapper">
-          <li className="item">
-            {props.data.allContentfulPerson.edges[0].node.blog_post[0].title}
-            {/* <article-preview :post="post"></article-preview> */}
-          </li>
-        </ul>
+        <ul className="items-list wrapper">{articles}</ul>
       </section>
     </div>
   )
@@ -114,6 +149,9 @@ export const pageQuery = graphql`
             slug
             tags
             publishDate
+            description {
+              description
+            }
             heroImage {
               id
               file {
@@ -121,19 +159,6 @@ export const pageQuery = graphql`
               }
             }
           }
-        }
-      }
-    }
-    allContentfulAsset {
-      edges {
-        node {
-          id
-          file {
-            url
-            fileName
-            contentType
-          }
-          title
         }
       }
     }
